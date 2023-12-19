@@ -27,6 +27,7 @@ public class MenuController : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        DontDestroyOnLoad(gameObject);
         canvas = GetComponent<Canvas>();
         resumeButton.onClick.AddListener(ResumeGame);
         characterButton.onClick.AddListener(OpenCharacterMenu);
