@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class CharacterController : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 1f;
     [SerializeField] private float RunSpeedMultiplier = 2;
@@ -13,11 +13,20 @@ public class CharacterController : MonoBehaviour
     private bool isJumping;
     private bool isRunning;
     private PlayerInputActions inputActions;
+    public static PlayerController Instance { get; private set; }
 
     private void Awake()
     {
-        inputActions = new PlayerInputActions();
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
         DontDestroyOnLoad(gameObject);
+        inputActions = new PlayerInputActions();
     }
     private void OnEnable()
     {

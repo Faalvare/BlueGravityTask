@@ -9,21 +9,27 @@ public class SceneLoader : MonoBehaviour
     [SerializeField] private Image curtain;
     public static SceneLoader Instance { get; private set; }
     private float transitionTime = 1f;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        DontDestroyOnLoad(gameObject);
+    }
     private void Start()
     {
-        if (Instance != null)
-        {
-            Destroy(this.gameObject);
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
     public void LoadSceneWithTransition(string sceneName,AudioClip transitionStartClip = null, AudioClip transitionEndClip = null)
     {
         if (curtain == null)
         {
-            Debug.LogWarning("Curtain component not found");
-            return;
+            curtain = GetComponentInChildren<Image>();
         }
 
         StartCoroutine(Transition(sceneName, transitionStartClip,transitionEndClip));

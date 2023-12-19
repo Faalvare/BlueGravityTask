@@ -8,6 +8,7 @@ public class SoundManager : MonoBehaviour
     public AudioClip[] musicClips;
     public AudioSource backgroundMusicSource;
     public AudioSource soundEffectSourcePrefab;
+    public bool playMusicOnStart = true;
 
     private List<AudioSource> soundEffectSources = new List<AudioSource>();
 
@@ -19,6 +20,14 @@ public class SoundManager : MonoBehaviour
             Destroy(gameObject);
 
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void Start()
+    {
+        if (playMusicOnStart)
+        {
+            PlayBackgroundMusic(0);
+        }
     }
 
     public void PlayBackgroundMusic(int musicIndex)
@@ -57,6 +66,11 @@ public class SoundManager : MonoBehaviour
         AudioSource newSource = Instantiate(soundEffectSourcePrefab, transform);
         soundEffectSources.Add(newSource);
         return newSource;
+    }
+
+    public void SetBGMVolume(float volume)
+    {
+        backgroundMusicSource.volume = volume;
     }
 }
 
