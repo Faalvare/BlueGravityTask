@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask jumpingLayer;
     [SerializeField] private SpriteAnimator[] spriteAnimators;
     [SerializeField] private Collider2D interactionCollider;
+    [SerializeField] private Inventory inventory;
     private Vector2 moveVector;
     private Vector2 characterDirection;
     private bool isJumping;
@@ -26,12 +27,10 @@ public class PlayerController : MonoBehaviour
             Destroy(gameObject);
         }
         DontDestroyOnLoad(gameObject);
-        inputActions = new PlayerInputActions();
     }
     private void OnEnable()
     {
-        inputActions.CharacterControls.Enable();
-        //Adding callbacks to input events
+        inputActions = InputManager.Instance.inputActions;
         inputActions.CharacterControls.Run.performed += OnRunInput;
         inputActions.CharacterControls.Run.canceled += OnRunCanceled;
         inputActions.CharacterControls.Jump.performed += OnJumpInput;
