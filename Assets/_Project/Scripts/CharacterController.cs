@@ -7,6 +7,7 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private float RunSpeedMultiplier = 2;
     [SerializeField] private LayerMask jumpingLayer;
     [SerializeField] private SpriteAnimator[] spriteAnimators;
+    [SerializeField] private Collider2D interactionCollider;
     private Vector2 moveVector;
     private Vector2 characterDirection;
     private bool isJumping;
@@ -40,14 +41,14 @@ public class CharacterController : MonoBehaviour
     }
     private void Update()
     {
-        Vector2 movement = moveVector * moveSpeed * Time.deltaTime;
+        Vector2 movement = moveVector * moveSpeed;
         // Add run multiplier
         if (isRunning)
         {
             movement *= RunSpeedMultiplier;
         }
 
-        transform.Translate(movement);
+        GetComponent<Rigidbody2D>().velocity = movement;
     }
     private void PlayAnimation(string animationName,bool loop)
     {
@@ -101,6 +102,7 @@ public class CharacterController : MonoBehaviour
                 characterDirection = Vector2.down;
             }
         }
+        interactionCollider.offset = characterDirection * 0.25f;
 
     }
     private void OnMoveInputCanceled(InputAction.CallbackContext context)
