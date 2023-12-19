@@ -7,7 +7,8 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private float RunSpeedMultiplier = 2;
     [SerializeField] private LayerMask jumpingLayer;
     [SerializeField] private SpriteAnimator[] spriteAnimators;
-    private Vector2 moveInput;
+    private Vector2 moveVector;
+    private Vector2 characterDirection;
     private bool isJumping;
     private bool isRunning;
     private PlayerInputActions inputActions;
@@ -19,51 +20,34 @@ public class CharacterController : MonoBehaviour
     private void OnEnable()
     {
         inputActions.CharacterControls.Enable();
-        inputActions.CharacterControls.Move.performed += OnMoveInput;
-        inputActions.CharacterControls.Jump.performed += OnJumpInput;
-        inputActions.CharacterControls.Run.performed += OnRunInput;
-        inputActions.CharacterControls.Move.canceled += OnMoveCanceled;
+        //Adding callbacks to input events
         inputActions.CharacterControls.Run.performed += OnRunInput;
         inputActions.CharacterControls.Run.canceled += OnRunCanceled;
+        inputActions.CharacterControls.Jump.performed += OnJumpInput;
+        inputActions.CharacterControls.Interact.performed += OnInteractInput;
+        inputActions.CharacterControls.Move.performed += OnMoveInput;
+        inputActions.CharacterControls.Move.canceled += OnMoveInputCanceled;
     }
     private void OnDisable()
     {
         inputActions.CharacterControls.Disable();
-        inputActions.CharacterControls.Move.performed -= OnMoveInput;
+        inputActions.CharacterControls.Run.performed -= OnRunInput;
+        inputActions.CharacterControls.Run.canceled -= OnRunCanceled;
         inputActions.CharacterControls.Jump.performed -= OnJumpInput;
-        inputActions.CharacterControls.Move.canceled -= OnMoveCanceled;
+        inputActions.CharacterControls.Interact.performed -= OnInteractInput;
+        inputActions.CharacterControls.Move.performed -= OnMoveInput;
+        inputActions.CharacterControls.Move.canceled -= OnMoveInputCanceled;
     }
     private void Update()
     {
-        // Calculate movement direction
-        float horizontalMovement = moveInput.x;
-        float verticalMovement = moveInput.y;
-
+        Vector2 movement = moveVector * moveSpeed * Time.deltaTime;
         // Add run multiplier
         if (isRunning)
         {
-            horizontalMovement *= RunSpeedMultiplier;
-            verticalMovement *= RunSpeedMultiplier;
+            movement *= RunSpeedMultiplier;
         }
 
-        // Normalize diagonal movement to restrict to four directions
-        if (horizontalMovement != 0f && verticalMovement != 0f)
-        {
-            if (Mathf.Abs(horizontalMovement) > Mathf.Abs(verticalMovement))
-            {
-                verticalMovement = 0f;
-            }
-            else
-            {
-                horizontalMovement = 0f;
-            }
-        }
-
-        // Move the character along the X or Y axis based on input
-        Vector3 movement = new Vector3(horizontalMovement, verticalMovement, 0f) * moveSpeed * Time.deltaTime;
         transform.Translate(movement);
-
-        // Rest of your jump logic...
     }
     private void PlayAnimation(string animationName,bool loop)
     {
@@ -74,13 +58,62 @@ public class CharacterController : MonoBehaviour
     }
 
     #region InputCallbacks
+
     private void OnMoveInput(InputAction.CallbackContext context)
     {
-        moveInput = context.ReadValue<Vector2>();
+        moveVector = context.ReadValue<Vector2>();
+        // Determine the direction based on the moveVector
+        if (Mathf.Abs(moveVector.x) > Mathf.Abs(moveVector.y))
+        {
+            if (moveVector.x > 0)
+            {
+                if (isRunning)
+                    PlayAnimation("RunRight", true);
+                else
+                    PlayAnimation("WalkRight", true);
+                characterDirection = Vector2.right;
+            }
+            else
+            {
+                if (isRunning)
+                    PlayAnimation("RunLeft", true);
+                else
+                    PlayAnimation("WalkLeft", true);
+                characterDirection = Vector2.left;
+            }
+        }
+        else
+        {
+            if (moveVector.y > 0)
+            {
+                if (isRunning)
+                    PlayAnimation("RunUp", true);
+                else
+                    PlayAnimation("WalkUp", true);
+                characterDirection = Vector2.up;
+            }
+            else
+            {
+                if (isRunning)
+                    PlayAnimation("RunDown", true);
+                else
+                    PlayAnimation("WalkDown", true);
+                characterDirection = Vector2.down;
+            }
+        }
+
     }
-    private void OnMoveCanceled(InputAction.CallbackContext context)
+    private void OnMoveInputCanceled(InputAction.CallbackContext context)
     {
-        moveInput = Vector2.zero;
+        moveVector = Vector2.zero;
+        if (characterDirection == Vector2.up)
+            PlayAnimation("IdleUp",false);
+        if (characterDirection == Vector2.down)
+            PlayAnimation("IdleDown", false);
+        if (characterDirection == Vector2.right)
+            PlayAnimation("IdleRight", false);
+        if (characterDirection == Vector2.left)
+            PlayAnimation("IdleLeft", false);
     }
     private void OnJumpInput(InputAction.CallbackContext context)
     {
@@ -100,10 +133,36 @@ public class CharacterController : MonoBehaviour
     private void OnRunInput(InputAction.CallbackContext context)
     {
         isRunning = true;
+        if (inputActions.CharacterControls.Move.IsPressed())
+        {
+            if (characterDirection == Vector2.up)
+                PlayAnimation("RunUp", true);
+            if (characterDirection == Vector2.down)
+                PlayAnimation("RunDown", true);
+            if (characterDirection == Vector2.right)
+                PlayAnimation("RunRight", true);
+            if (characterDirection == Vector2.left)
+                PlayAnimation("RunLeft", true);
+        }
     }
     private void OnRunCanceled(InputAction.CallbackContext context)
     {
         isRunning = false;
+        if (inputActions.CharacterControls.Move.IsPressed())
+        {
+            if (characterDirection == Vector2.up)
+                PlayAnimation("WalkUp", true);
+            if (characterDirection == Vector2.down)
+                PlayAnimation("WalkDown", true);
+            if (characterDirection == Vector2.right)
+                PlayAnimation("WalkRight", true);
+            if (characterDirection == Vector2.left)
+                PlayAnimation("WalkLeft", true);
+        }
+    }
+    private void OnInteractInput(InputAction.CallbackContext context)
+    {
+
     }
     #endregion
 }

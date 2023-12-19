@@ -70,7 +70,8 @@ public class SpriteAnimator : MonoBehaviour
     public void PlayAnimationByName(string animationName,bool loop = true)
     {
         SpriteAnimation spriteAnimation = FindAnimationByName(animationName);
-
+        if (currentSpriteAnimation == spriteAnimation)
+            return;
         if (spriteAnimation == null)
             return;
 
