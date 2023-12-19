@@ -17,6 +17,7 @@ public class CharacterController : MonoBehaviour
     private void Awake()
     {
         inputActions = new PlayerInputActions();
+        DontDestroyOnLoad(gameObject);
     }
     private void OnEnable()
     {
